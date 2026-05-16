@@ -9,7 +9,7 @@ and threat intelligence correlation. The purpose of this repository is to showca
   <tr>
      <th>Report</th>
      <th>Link</th>
-  </tr>tr>  
+  </tr>  
   <tr>
     <td>Malware Analysis from Suspicious IP Address and Hash</td>
     <td><a href = "https://github.com/amphib24/soc-reports/tree/main/malware-investigation-virustotal">Report</a></td>
