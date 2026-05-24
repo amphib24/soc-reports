@@ -8,7 +8,10 @@ and creating additional accounts to maintain access. Each event is documented wi
 
 ## Tools Used
 <table>
+<tr>
 <th>Tool</th>
+</tr>
+
 <tr>
     <td>Base64decode.com</td>
  </tr>
@@ -31,9 +34,11 @@ and creating additional accounts to maintain access. Each event is documented wi
 
 ## Provided Artifacts
 <table>
+<tr>
 <th>File</th>
 <th>Hash Type</th>
 <th>Hash</th>
+</tr>
 <tr>
     <td>capture.pcapng</td>
     <td>SHA256</td>
@@ -57,7 +62,6 @@ and creating additional accounts to maintain access. Each event is documented wi
 <th>Start time</th>
 <th>Process Termination</th>
 <th>Notes</th>
-
 <tr>
    <td>chrome.exe</td>
    <td>8132</td>
@@ -243,8 +247,10 @@ to maintain privileged access to the host.  The combination of these events indi
 ## Malicious Artifact Hash Table
 
 <table>
+<tr>
 <th>File<th>
 <th>Hash</th>
+</tr>
 <tr>
    <td>free_magicules.doc</td>
    <td>E25F32401FD3D25958B8B99F280F0325B232E54F185CC5D6E0710923005AC64A </td>
