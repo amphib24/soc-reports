@@ -248,7 +248,7 @@ to maintain privileged access to the host.  The combination of these events indi
 
 <table>
 <tr>
-<th>File<th>
+<th>File</th>
 <th>Hash</th>
 </tr>
 <tr>
