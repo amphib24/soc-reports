@@ -2,7 +2,7 @@
 
 ## Executive Summary
 &nbsp;&nbsp;&nbsp; This report is an analysis of an escalated critical alert involving the user `benimaru` on the Windows host `TEMPEST`. Investigation into the event verifies the 
-user opened a malicious Microsoft Word document named `free_magicules.doc`, which led to the exploitation of a high-severity remote code execution vulnerability CVE-2022-3091, also 
+user opened a malicious Microsoft Word document named `free_magicules.doc`, which led to the exploitation of a high-severity remote code execution vulnerability CVE-2022-30190, also 
 known as Follina. Post-execution activities included establishing initial persistence, connection to a command-and-control server, user and system enumeration, privilege escalation,
 and creating additional accounts to maintain access. Each event is documented with corresponding evidence and is mapped to a MITRE ATT&CK technique and ID.
 
@@ -13,7 +13,7 @@ and creating additional accounts to maintain access. Each event is documented wi
 </tr>
 
 <tr>
-    <td>Base64decode.org</td>
+    <td>Base64Decode.org</td>
  </tr>
 <tr>	
     <td>Event Viewer</td>
@@ -113,11 +113,37 @@ and creating additional accounts to maintain access. Each event is documented wi
 </tr>
 </table>
 
+## Process Tree 
+
+#### Initial access
+
+```
+Chrome.exe
+                   └─ WINWORD.EXE (opened free_magicules.doc)
+                            └─msdt.exe
+                                  └─powershell.exe
+                                       └─ downloads update.zip -> initial persistence mechanism established
+   ```                                           
+
+#### Post Logon Download Chain
+
+```
+  certutil.exe
+    └─first.exe
+             └─powershell.exe
+                  ├ downloads: ch.exe   -> SOCKS proxy (C2 tunnel)
+                  ├  downloads: spf.exe  -> PrintSpoofer (privilege escalation)
+                  └─ downloads: final.exe -> final payload (post-exploitation/discovery)
+```
+
+
+# Analysis
+
 ## Initial access:
 
 MITRE ID: T1566 – Phishing 
 
-Domain IP: 167[.]71[.]199[.]191
+Phishteam IP: 167[.]71[.]199[.]191
 
 &nbsp;&nbsp;&nbsp; Investigation indicates the user `TEMPEST/benimaru` downloaded a malicious file `free_magicules.doc` from URL `hxxp://phishteam[.]xyz/02dcf07/free_magicules[.]doc` using 
 `chrome.exe`. 
@@ -165,7 +191,7 @@ This allowed for `first.exe` to be executed as soon as the user logged into the 
 
 MITRE ID: T1071.001 – Application Layer Protocols: Web Protocols
 
-Domain IP: 167[.]71[.]222[.]162
+Resolvecyber IP: 167[.]71[.]222[.]162
 
 &nbsp;&nbsp;&nbsp;A hidden, non-interactive PowerShell command utilized `certutil.exe` to download a secondary payload `first.exe` from `hxxp://phishteam[.]xyz/02dcf07/first[.]exe`. `first.exe` 
 was then immediately executed, which initiated a connection to the command-and-control server `hxxp://resolvecyber[.]xyz/9ab62b5`. The connection was verified correlating network 
@@ -184,8 +210,7 @@ traffic events with Sysmon log events.
 
 MITRE ID: T1572 – Protocol Tunneling
 
-&nbsp;&nbsp;&nbsp;Following the initial C2 connection byestablished  `first.exe`, the malware downloaded `ch.exe` from `phishteam[.]xyz`, via  PowerShell Invoke-WebRequest. The file established a Chisel SOCKS proxy, 
-which allowed the attacker to forward traffic through an intermediary host (`phishteam[.]xyz`) and obscure communications originating from the primary C2 server (`resolvecyber[.]xyz`). 
+&nbsp;&nbsp;&nbsp;Following the initial C2 connection established by  `first.exe`, the malware downloaded `ch.exe` from `phishteam[.]xyz`, via  PowerShell Invoke-WebRequest. The execution of ch.exe resulted in the establishment of a reverse tunnel to an attacker-controlled command-and-control server. This tunnel established a SOCKS proxy, which enabled the attacker to route traffic through the compromised host and perform internal reconnaissance. 
 Additional analysis identified the use of wsmprovhost.exe, indicating PowerShell and WinRM post-exploitation command execution.
 
 #### PowerShell Command: 
@@ -230,8 +255,8 @@ MITRE ID:
    -	T1136.001 – Create Account: Local Account
 
 &nbsp;&nbsp;&nbsp;Following the execution of `final.exe`, the attacker established multiple persistence mechanisms to ensure long-term access to the host. Two scheduled tasks were created
-(`TempestUpdate` and `TempestUpdate2`) both of which were configured to execute `C:\ProgramData\final.exe` at startup.Additionally, the attacker created two new user accounts
-(`shuna` and `shion`). Shion was added to `localgroup administrators`, this behavior combined with the attacker changing the administrator account password is indicative of an attempt 
+(`TempestUpdate` and `TempestUpdate2`) both of which were configured to execute `C:\ProgramData\final.exe` at startup. Additionally, the attacker created two new user accounts
+(`shuna` and `shion`). Shion was added to `localgroup administrators`. This behavior, combined with the attacker changing the administrator account password, is indicative of an attempt 
 to maintain privileged access to the host.  The combination of these events indicates the attacker took multiple steps to maintain persistence on the host machine. 
 
 #### Scheduled Tasks:
@@ -280,10 +305,10 @@ The initial phishing vector `free_magicules.doc` should be added to email blockl
 The following malicious domains and IP addresses need to be blocked at DNS and firewall levels.
   
    -	Domain: `phishteam[.]xyz` IP: `167[.]71[.]199[.]191`
-   -	Domain: `resolvecyber.xyz` IP: `167[.]71[.]222[.]162`
+   -	Domain: `resolvecyber[.]xyz` IP: `167[.]71[.]222[.]162`
 
-&nbsp;&nbsp;&nbsp; Any payload files ( `update.zip`, `first.exe`, ` ch.ex`, `spf.exe`, `final.exe`) and their associated hashes need to be added to blocklists on all endpoint 
-security mechanisms. Additionally, all persistence mechanisms including scheduled tasks, start up folder entries, and unauthorized accounts created during the attack need to 
+&nbsp;&nbsp;&nbsp; Any payload files ( `update.zip`, `first.exe`, ` ch.exe`, `spf.exe`, `final.exe`) and their associated hashes need to be added to blocklists on all endpoint 
+security mechanisms. Additionally, all persistence mechanisms including scheduled tasks, startup folder entries, and unauthorized accounts created during the attack need to 
 be removed from the host, and any account associated with a password change needs to be reset. 
 &nbsp;&nbsp;&nbsp; Given the severity of the attack and the privileges gained by the attacker a full forensics analysis should be conducted to ensure no residual access, 
 files or accounts remain. 
@@ -295,5 +320,5 @@ initial connection to the phishing site `phishteam[.]xyz`. The initial payload w
 to the C2 server `resolvecyber.xyz`. 
 &nbsp;&nbsp;&nbsp;Following this event, the attacker was able to establish a successful SOCKS proxy using Chisel which was executed via `ch.exe`, enabling the attacker to mask the
 C2 servers’ identity by rerouting the traffic through`phishteam[.]xyz`.  Further analysis indicates the attacker was able to gain SYSTEM-level access and establish and maintain long-term 
-persistence via schedule tasks and new account creation, including membership in the local Administrators group.  This activity demonstrates a full attack lifecycle consisting of initial 
+persistence via scheduled tasks and new account creation, including membership in the local Administrators group.  This activity demonstrates a full attack lifecycle consisting of initial 
 access, C2 establishment, privilege escalation, and persistence mechanisms. 
