@@ -145,7 +145,7 @@ MITRE ID: T1566 – Phishing
 
 Phishteam IP: 167[.]71[.]199[.]191
 
-&nbsp;&nbsp;&nbsp; Investigation indicates the user `TEMPEST/benimaru` downloaded a malicious file `free_magicules.doc` from URL `hxxp://phishteam[.]xyz/02dcf07/free_magicules[.]doc` using 
+&nbsp;&nbsp;&nbsp; Investigation indicates the user `TEMPEST/benimaru` downloaded a malicious file `free_magicules.doc` from URL `hxxp[://]phishteam[.]xyz/02dcf07/free_magicules[.]doc` using 
 `chrome.exe`. 
 
 ## Execution 
@@ -153,7 +153,7 @@ Phishteam IP: 167[.]71[.]199[.]191
 MITRE ID: T1204.002 – User Execution: Malicious File
 
 &nbsp;&nbsp;&nbsp; The user opened `free_magicules.doc` which triggered a `ms-msdt` to invoke PowerShell code containing a Base-64 encoded payload being downloaded via
-`hxxp://phishteam[.]xyz/02dcf07/update[.]zip`.
+`hxxp[://]phishteam[.]xyz/02dcf07/update[.]zip`.
 
 PowerShell code: 
 
@@ -193,8 +193,8 @@ MITRE ID: T1071.001 – Application Layer Protocols: Web Protocols
 
 Resolvecyber IP: 167[.]71[.]222[.]162
 
-&nbsp;&nbsp;&nbsp;A hidden, non-interactive PowerShell command utilized `certutil.exe` to download a secondary payload `first.exe` from `hxxp://phishteam[.]xyz/02dcf07/first[.]exe`. `first.exe` 
-was then immediately executed, which initiated a connection to the command-and-control server `hxxp://resolvecyber[.]xyz/9ab62b5`. The connection was verified correlating network 
+&nbsp;&nbsp;&nbsp;A hidden, non-interactive PowerShell command utilized `certutil.exe` to download a secondary payload `first.exe` from `hxxp[://]phishteam[.]xyz/02dcf07/first[.]exe`. `first.exe` 
+was then immediately executed, which initiated a connection to the command-and-control server `hxxp[://]resolvecyber[.]xyz/9ab62b5`. The connection was verified correlating network 
 traffic events with Sysmon log events.  
 
 #### PowerShell Command:
@@ -204,7 +204,7 @@ traffic events with Sysmon log events.
 
 ```
 
-&nbsp;&nbsp;&nbsp; The execution of `first.exe` resulted in a new connection to a command-and-control server located at `hxxp://resolvecyber[.]xyz/9ab62b5`.
+&nbsp;&nbsp;&nbsp; The execution of `first.exe` resulted in a new connection to a command-and-control server located at `hxxp[://]resolvecyber[.]xyz/9ab62b5`.
 
 ### Chisel SOCKS Tunnel 
 
@@ -317,7 +317,7 @@ files or accounts remain.
 
 &nbsp;&nbsp;&nbsp; The investigation confirmed a multi-stage attack initiated by a phishing attachment `free_magicules.doc` opened by the user `benimaru`. This activity led to an 
 initial connection to the phishing site `phishteam[.]xyz`. The initial payload was stored in the user’s startup folder which led to the execution of `first.exe` resulting in a connection 
-to the C2 server `resolvecyber.xyz`. 
+to the C2 server `resolvecyber[.]xyz`. 
 &nbsp;&nbsp;&nbsp;Following this event, the attacker was able to establish a successful SOCKS proxy using Chisel which was executed via `ch.exe`, enabling the attacker to mask the
 C2 servers’ identity by rerouting the traffic through`phishteam[.]xyz`.  Further analysis indicates the attacker was able to gain SYSTEM-level access and establish and maintain long-term 
 persistence via scheduled tasks and new account creation, including membership in the local Administrators group.  This activity demonstrates a full attack lifecycle consisting of initial 
